@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"strings"
 	"syscall"
 
 	"maunium.net/go/mautrix"
@@ -81,7 +82,7 @@ func main() {
 								fmt.Printf("<%[1]s> %[4]s (%[2]s/%[3]s)\n", evt.Sender, evt.Type, evt.ID, evt.Content["body"])
 								buffer.WriteString(shortcutmap[match[1]] + match[2] + " ")
 							}
-							evt.Room.Send(buffer.String())
+							evt.Room.Send(strings.TrimSuffix(buffer.String(), " "))
 						}
 					}
 				default:
