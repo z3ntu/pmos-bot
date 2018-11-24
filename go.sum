@@ -1,0 +1,4 @@
+github.com/grokify/html-strip-tags-go v0.0.0-20180907063347-e9e44961e26f h1:CTesHAvAG+NLVJQjbN26kTriSz5YMpeEN0iwVCA37x8=
+github.com/grokify/html-strip-tags-go v0.0.0-20180907063347-e9e44961e26f/go.mod h1:Xk7G0nwBiIloTMbLddk4WWJOqi4i/JLhadLd0HUXO30=
+maunium.net/go/mautrix v0.0.0-20180427121505-1b6683bcd21d h1:Aow0JHxJHcTZ1nXpbY2fTO3i+0jK9dyM1jgLPV7Pduk=
+maunium.net/go/mautrix v0.0.0-20180427121505-1b6683bcd21d/go.mod h1:+thZeequb2CuDc9BwbdsGu0RmALOBavZl3aRHsWm4xQ=
