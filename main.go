@@ -1,5 +1,6 @@
-// mautrix - A Matrix client-server library intended for bots.
+// pmos-bot - A bot for the postmarketOS Matrix channels
 // Copyright (C) 2017 Tulir Asokan
+// Copyright (C) 2018 Luca Weiss
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -71,11 +73,15 @@ func main() {
 							evt.Room.ID == "!VTQfOrQIBniIdCuMOq:matrix.org" || // #postmarketos-offtopic:disroot.org
 							evt.Room.ID == "!NBvxopLbDoLCDlqKkL:z3ntu.xyz") { // #test2:z3ntu.xyz
 						r := regexp.MustCompile("(pma[#!]|pmb[#!]|org[#!])(\\d+)")
-						matches := r.FindStringSubmatch(evt.Content["body"].(string))
+						matches := r.FindAllStringSubmatch(evt.Content["body"].(string), -1)
 						if matches != nil {
-							fmt.Println(matches[1] + matches[2] + " matched!")
-							fmt.Printf("<%[1]s> %[4]s (%[2]s/%[3]s)\n", evt.Sender, evt.Type, evt.ID, evt.Content["body"])
-							evt.Room.Send(shortcutmap[matches[1]] + matches[2])
+							var buffer bytes.Buffer
+							for _, match := range matches {
+								fmt.Println(match[1] + match[2] + " matched!")
+								fmt.Printf("<%[1]s> %[4]s (%[2]s/%[3]s)\n", evt.Sender, evt.Type, evt.ID, evt.Content["body"])
+								buffer.WriteString(shortcutmap[match[1]] + match[2] + " ")
+							}
+							evt.Room.Send(buffer.String())
 						}
 					}
 				default:
