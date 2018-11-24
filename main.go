@@ -56,6 +56,7 @@ func main() {
 		"org#": "https://gitlab.com/postmarketOS/postmarketos.org/issues/",
 		"org!": "https://gitlab.com/postmarketOS/postmarketos.org/merge_requests/",
 	}
+	shortcutmapregex := regexp.MustCompile("(pma[#!]|pmb[#!]|org[#!])(\\d+)")
 
 	go mxbot.Listen()
 	go func() {
@@ -73,8 +74,7 @@ func main() {
 							evt.Room.ID == "!MxNOnZlZaurAGfcxFy:matrix.org" || // #postmarketos-lowlevel:disroot.org
 							evt.Room.ID == "!VTQfOrQIBniIdCuMOq:matrix.org" || // #postmarketos-offtopic:disroot.org
 							evt.Room.ID == "!NBvxopLbDoLCDlqKkL:z3ntu.xyz") { // #test2:z3ntu.xyz
-						r := regexp.MustCompile("(pma[#!]|pmb[#!]|org[#!])(\\d+)")
-						matches := r.FindAllStringSubmatch(evt.Content["body"].(string), -1)
+						matches := shortcutmapregex.FindAllStringSubmatch(evt.Content["body"].(string), -1)
 						if matches != nil {
 							var buffer bytes.Buffer
 							for _, match := range matches {
