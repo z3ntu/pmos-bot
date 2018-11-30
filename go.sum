@@ -1,4 +1,4 @@
-github.com/grokify/html-strip-tags-go v0.0.0-20180907063347-e9e44961e26f h1:CTesHAvAG+NLVJQjbN26kTriSz5YMpeEN0iwVCA37x8=
-github.com/grokify/html-strip-tags-go v0.0.0-20180907063347-e9e44961e26f/go.mod h1:Xk7G0nwBiIloTMbLddk4WWJOqi4i/JLhadLd0HUXO30=
-maunium.net/go/mautrix v0.0.0-20180427121505-1b6683bcd21d h1:Aow0JHxJHcTZ1nXpbY2fTO3i+0jK9dyM1jgLPV7Pduk=
-maunium.net/go/mautrix v0.0.0-20180427121505-1b6683bcd21d/go.mod h1:+thZeequb2CuDc9BwbdsGu0RmALOBavZl3aRHsWm4xQ=
+golang.org/x/net v0.0.0-20181129055619-fae4c4e3ad76 h1:xx5MUFyRQRbPk6VjWjIE1epE/K5AoDD8QUN116NCy8k=
+golang.org/x/net v0.0.0-20181129055619-fae4c4e3ad76/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+maunium.net/go/mautrix v0.0.0-20181114121347-3b909a424d14 h1:BU2payokgLMTgVLubdEmHhzjtoe3dR5eLpNLQXVblPY=
+maunium.net/go/mautrix v0.0.0-20181114121347-3b909a424d14/go.mod h1:+thZeequb2CuDc9BwbdsGu0RmALOBavZl3aRHsWm4xQ=

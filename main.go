@@ -21,13 +21,9 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"os"
-	"os/signal"
+	"maunium.net/go/mautrix"
 	"regexp"
 	"strings"
-	"syscall"
-
-	"maunium.net/go/mautrix"
 )
 
 var homeserver = flag.String("homeserver", "https://matrix.org", "Matrix homeserver")
@@ -37,16 +33,19 @@ var password = flag.String("password", "", "Matrix password")
 func main() {
 	flag.Parse()
 	fmt.Println("Logging to", *homeserver, "as", *username)
-	mxbot := mautrix.Create(*homeserver)
-
-	err := mxbot.PasswordLogin(*username, *password)
+	client, err := mautrix.NewClient(*homeserver, "", "")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Login successful")
+	resp, err := client.Login(&mautrix.ReqLogin{Type: "m.login.password", User: *username, Password: *password})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	client.SetCredentials(resp.UserID, resp.AccessToken)
 
-	stop := make(chan bool, 1)
+	fmt.Println("Login successful")
 
 	shortcutmap := map[string]string{
 		"pma#": "https://gitlab.com/postmarketOS/pmaports/issues/",
@@ -58,48 +57,32 @@ func main() {
 	}
 	shortcutmapregex := regexp.MustCompile("(pma[#!]|pmb[#!]|org[#!])(\\d+)")
 
-	go mxbot.Listen()
-	go func() {
-	Loop:
-		for {
-			select {
-			case <-stop:
-				break Loop
-			case evt := <-mxbot.Timeline:
-				evt.MarkRead()
-				switch evt.Type {
-				case mautrix.EvtRoomMessage:
-					if evt.Sender != *username &&
-						(evt.Room.ID == "!clcCCNrLZYwdfNqkkR:disroot.org" || // #postmarketos:disroot.org
-							evt.Room.ID == "!MxNOnZlZaurAGfcxFy:matrix.org" || // #postmarketos-lowlevel:disroot.org
-							evt.Room.ID == "!VTQfOrQIBniIdCuMOq:matrix.org" || // #postmarketos-offtopic:disroot.org
-							evt.Room.ID == "!NBvxopLbDoLCDlqKkL:z3ntu.xyz") { // #test2:z3ntu.xyz
-						matches := shortcutmapregex.FindAllStringSubmatch(evt.Content["body"].(string), -1)
-						if matches != nil {
-							var buffer bytes.Buffer
-							for _, match := range matches {
-								fmt.Println(match[1] + match[2] + " matched!")
-								fmt.Printf("<%[1]s> %[4]s (%[2]s/%[3]s)\n", evt.Sender, evt.Type, evt.ID, evt.Content["body"])
-								buffer.WriteString(shortcutmap[match[1]] + match[2] + " ")
-							}
-							evt.Room.Send(strings.TrimSuffix(buffer.String(), " "))
-						}
-					}
-				default:
-					fmt.Println("Unidentified event of type", evt.Type)
+	syncer := client.Syncer.(*mautrix.DefaultSyncer)
+	syncer.OnEventType(mautrix.EventMessage, func(evt *mautrix.Event) {
+		if evt.Sender != *username &&
+			(evt.RoomID == "!clcCCNrLZYwdfNqkkR:disroot.org" || // #postmarketos:disroot.org
+				evt.RoomID == "!MxNOnZlZaurAGfcxFy:matrix.org" || // #postmarketos-lowlevel:disroot.org
+				evt.RoomID == "!VTQfOrQIBniIdCuMOq:matrix.org" || // #postmarketos-offtopic:disroot.org
+				evt.RoomID == "!NBvxopLbDoLCDlqKkL:z3ntu.xyz") { // #test2:z3ntu.xyz
+			matches := shortcutmapregex.FindAllStringSubmatch(evt.Content.Body, -1)
+			if matches != nil {
+				var buffer bytes.Buffer
+				for _, match := range matches {
+					fmt.Println(match[1] + match[2] + " matched!")
+					fmt.Printf("<%[1]s> %[4]s (%[2]s/%[3]s)\n", evt.Sender, evt.Type.String(), evt.ID, evt.Content.Body)
+					buffer.WriteString(shortcutmap[match[1]] + match[2] + " ")
 				}
-			case roomID := <-mxbot.InviteChan:
-				invite := mxbot.Invites[roomID]
-				fmt.Printf("%s invited me to %s (%s)\n", invite.Sender, invite.Name, invite.ID)
-				fmt.Println(invite.Accept())
+				content := mautrix.Content{MsgType: mautrix.MsgText, Body: strings.TrimSuffix(buffer.String(), " ")}
+				_, err := client.SendMessageEvent(evt.RoomID, mautrix.EventMessage, content)
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
-		mxbot.Stop()
-	}()
+	})
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	<-c
-	stop <- true
-
+	err = client.Sync()
+	if err != nil {
+		fmt.Println(err)
+	}
 }
