@@ -55,7 +55,7 @@ func main() {
 		"org#": "https://gitlab.com/postmarketOS/postmarketos.org/issues/",
 		"org!": "https://gitlab.com/postmarketOS/postmarketos.org/merge_requests/",
 	}
-	shortcutmapregex := regexp.MustCompile("(pma[#!]|pmb[#!]|org[#!])(\\d+)")
+	shortcutmapregex := regexp.MustCompile("(?i)(pma[#!]|pmb[#!]|org[#!])(\\d+)")
 
 	syncer := client.Syncer.(*mautrix.DefaultSyncer)
 	syncer.OnEventType(mautrix.EventMessage, func(evt *mautrix.Event) {
@@ -70,7 +70,7 @@ func main() {
 				for _, match := range matches {
 					fmt.Println(match[1] + match[2] + " matched!")
 					fmt.Printf("<%[1]s> %[4]s (%[2]s/%[3]s)\n", evt.Sender, evt.Type.String(), evt.ID, evt.Content.Body)
-					buffer.WriteString(shortcutmap[match[1]] + match[2] + " ")
+					buffer.WriteString(shortcutmap[strings.ToLower(match[1])] + match[2] + " ")
 				}
 				content := mautrix.Content{MsgType: mautrix.MsgText, Body: strings.TrimSuffix(buffer.String(), " ")}
 				_, err := client.SendMessageEvent(evt.RoomID, mautrix.EventMessage, content)
